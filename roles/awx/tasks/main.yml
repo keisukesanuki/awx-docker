@@ -1,0 +1,55 @@
+---
+# tasks file for awx
+- name: install_package
+  yum:
+    name:
+      - epel-release
+      - docker
+      - python-pip
+      - git
+      - python-devel
+    state: present
+
+- name: pip_update
+  shell: pip install --upgrade pip
+
+- name: install ansible docker
+  pip:
+    name:
+      - ansible
+      - docker-compose
+
+#- name: awx_get
+#  git:
+#    repo: https://github.com/ansible/awx.git
+#    dest: /usr/local/src/awx/
+
+- name: awx_get
+  unarchive:
+     src: ../files/awx-9.0.0.zip
+     dest: /usr/local/src/
+
+- name: rename_dir
+  shell: mv awx-9.0.0 awx
+  args:
+    chdir: /usr/local/src/
+
+- name: mod_conf
+  shell: sed -i "s/# \(use_docker_compose\)\=.*$/\1\=true/g" ./inventory
+  args:
+    chdir: /usr/local/src/awx/installer/
+
+#- name: mod_conf2
+#  blockinfile:
+#    dest: /etc/httpd/conf/httpd.conf
+#    insertafter: '^project_data_dir=/var/lib/awx/projects'
+#    content: 'project_data_dir=/var/lib/awx/projects'
+
+- name: pre_docker_start
+  shell: systemctl restart docker
+
+- name: exec
+  shell: ansible-playbook -i inventory install.yml
+  args:
+    chdir: /usr/local/src/awx/installer/
+  notify: docker_start

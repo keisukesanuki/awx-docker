@@ -1,0 +1,7 @@
+---
+# handlers file for awx
+- name: docker_start
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
