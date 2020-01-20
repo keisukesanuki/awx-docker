@@ -42,5 +42,4 @@ BSD
 Author Information
 ------------------
 
-- junichirou okazaki 
 - keisuke sanuki 

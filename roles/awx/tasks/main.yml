@@ -8,6 +8,7 @@
       - python-pip
       - git
       - python-devel
+      - sshpass
     state: present
 
 - name: pip_update
@@ -19,12 +20,19 @@
       - ansible
       - docker-compose
 
-#- name: awx_get
-#  git:
-#    repo: https://github.com/ansible/awx.git
-#    dest: /usr/local/src/awx/
+###################################################
+#                最新ソースから                   #
+###################################################
+#- name: awx_get                                  
+#  git:                                           
+#    repo: https://github.com/ansible/awx.git     
+#    dest: /usr/local/src/awx/                    
+###################################################
 
-- name: awx_get
+###################################################
+#                   9.0.0から                     #
+###################################################
+- name: awx_get                                  
   unarchive:
      src: ../files/awx-9.0.0.zip
      dest: /usr/local/src/
@@ -33,17 +41,32 @@
   shell: mv awx-9.0.0 awx
   args:
     chdir: /usr/local/src/
+###################################################
 
-- name: mod_conf
+###################################################
+#                    8.0.0から                    #
+###################################################
+#- name: awx_get
+#  unarchive:
+#     src: ../files/awx-8.0.0.zip
+#     dest: /usr/local/src/
+#
+#- name: rename_dir
+#  shell: mv awx-8.0.0 awx
+#  args:
+#    chdir: /usr/local/src/
+###################################################
+
+- name: mod_conf1
   shell: sed -i "s/# \(use_docker_compose\)\=.*$/\1\=true/g" ./inventory
   args:
     chdir: /usr/local/src/awx/installer/
 
-#- name: mod_conf2
-#  blockinfile:
-#    dest: /etc/httpd/conf/httpd.conf
-#    insertafter: '^project_data_dir=/var/lib/awx/projects'
-#    content: 'project_data_dir=/var/lib/awx/projects'
+- name: mod_conf2
+  blockinfile:
+    dest: /usr/local/src/awx/installer/inventory
+    insertafter: '^project_data_dir=/var/lib/awx/projects'
+    content: 'project_data_dir=/var/lib/awx/projects'
 
 - name: pre_docker_start
   shell: systemctl restart docker
